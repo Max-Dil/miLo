@@ -1,0 +1,48 @@
+local m = {}
+m.running = {}
+
+m.new = function(obj: table, listener: function)
+    if len(obj.events.update) <= 0 then
+        table.insert(m.running, obj)
+    end
+    table.insert(obj.events.update, listener)
+end
+
+m.remove = function(obj: table, listener: function)
+    for i = len(obj.events.update)-1, 0, -1 do
+        if obj.events.update[i] == listener then
+            table.remove(obj.events.update, i)
+            break
+        end
+    end
+    if len(obj.events.touch) == 0 then
+        for i = len(m.running)-1, 0, -1 do
+            if m.running[i] == obj then
+                table.remove(m.running, i)
+                break
+            end
+        end
+    end
+end
+
+m.update = function(dt: number)
+    for i = len(m.running)-1, 0, -1 do
+        local obj: table = m.running[i]
+        if not obj then
+            table.remove(m.running, i)
+            return true
+        end
+        if obj.group.isVisible then
+            for i2 = 0, len(obj.events.update)-1, 1 do
+                obj.events.update[i2](
+                    {
+                        dt = dt,
+                        target = obj
+                    }
+                )
+            end
+        end
+    end
+end
+
+milo.__update = m

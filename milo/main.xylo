@@ -1,0 +1,41 @@
+global milo: table = {
+    defaultNumber = function(value: number|undefined|null, default: number|undefined|null): number
+        if (type(default) == "undefined") or (type(default) == "null") then
+            default = 0
+        end
+        if (type(value) == "undefined") or (type(value) == "null") then
+            value = default
+        end
+        return value or 0
+    end,
+    defaultString = function(value: string|undefined|null, default: string|undefined|null): string
+        if (type(default) == "undefined") or (type(default) == "null") then
+            default = "null"
+        end
+        if (type(value) == "undefined") or (type(value) == "null") then
+            value = default
+        end
+        return value or "null"
+    end,
+    jsClass = require("/milo/js/jsClass.js"),
+}
+
+milo.__physics = require("/milo/js/planck-xylo.js")
+require("/milo/xylo/physics.xylo")
+milo.physics = physics
+
+require("/milo/xylo/display")
+require("/milo/xylo/group")
+
+milo.display = display
+
+require("/milo/xylo/timer.xylo")
+
+local loop = require("/milo/js/loop.js")
+loop.init(milo)
+
+require("/milo/xylo/click.xylo")
+require("/milo/xylo/key.xylo")
+require("/milo/xylo/update.xylo")
+
+print(milo)

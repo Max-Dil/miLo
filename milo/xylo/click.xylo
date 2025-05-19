@@ -1,0 +1,113 @@
+local m: table = {
+    running = {},
+}
+
+m.new = function(obj: table, listener: function)
+    obj.events = obj.events or {}
+    obj.events.touch = obj.events.touch or {}
+    if len(obj.events.touch) == 0 then
+        table.insert(m.running, obj)
+    end
+    table.insert(obj.events.touch, listener)
+end
+
+m.remove = function(obj: table, listener: function)
+    for i = len(obj.events.touch)-1, 0, -1 do
+        if obj.events.touch[i] == listener then
+            table.remove(obj.events.touch, i)
+            break
+        end
+    end
+    if len(obj.events.touch) == 0 then
+        for i = len(m.running)-1, 0, -1 do
+            if m.running[i] == obj then
+                table.remove(m.running, i)
+                break
+            end
+        end
+    end
+end
+
+local handle_touch = function(x: number, y: number, event_type: string)
+    for i = len(m.running)-1, 0, -1 do
+        local obj: table = m.running[i]
+        local isTouch: boolean = false
+        if obj._type == "newRect" then
+            if (x > (obj.x - (obj.width / 2))) and (x < (obj.x + (obj.width / 2))) and
+       (y > (obj.y - (obj.height / 2))) and (y < (obj.y + (obj.height / 2))) then
+                isTouch = true
+            end
+        end
+
+        if isTouch then
+            local result
+            for j = 0, len(obj.events.touch)-1 do
+                local event = {
+                    phase = event_type,
+                    target = obj,
+                    x = x,
+                    y = y,
+                }
+                result = obj.events.touch[j](event)
+                if result then
+                    break
+                end
+            end
+            if result then
+                break
+            end
+        end
+    end
+end
+
+
+local canvas = window._draw[0]
+
+canvas.addEventListener("touchstart", function(e: table)
+    e.preventDefault()
+    local touch = e.touches[0]
+    local x = touch.clientX
+    local y = touch.clientY
+    handle_touch(x, y, "began")
+end)
+
+canvas.addEventListener("mousedown", function(e: table)
+    e.preventDefault()
+    local x = e.clientX
+    local y = e.clientY
+    handle_touch(x, y, "began")
+
+end)
+
+canvas.addEventListener("touchend", function(e: table)
+    e.preventDefault()
+    local touch = e.changedTouches[0]
+    local x = touch.clientX
+    local y = touch.clientY
+    handle_touch(x, y, "ended")
+end)
+
+canvas.addEventListener("mouseup", function(e: table)
+    e.preventDefault()
+    local x = e.clientX
+    local y = e.clientY
+    handle_touch(x, y, "ended")
+
+end)
+
+canvas.addEventListener("touchmove", function(e: table)
+    e.preventDefault()
+    local touch = e.touches[0]
+    local x = touch.clientX
+    local y = touch.clientY
+    handle_touch(x, y, "moved")
+end)
+
+canvas.addEventListener("mousemove", function(e: table)
+    e.preventDefault()
+    local x = e.clientX
+    local y = e.clientY
+    handle_touch(x, y, "moved")
+end)
+
+milo.__click = m

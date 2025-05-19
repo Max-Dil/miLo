@@ -1,0 +1,126 @@
+
+local m = {}
+local running = {}
+
+local timerClass = {}
+
+timerClass.cancel = function(self: table)
+    for i = len(running)-1, 0, -1 do
+        if running[i] == self then
+            table.remove(running, i)
+            break
+        end
+    end
+end
+
+timerClass.pause = function(self: table)
+    self.on = false
+end
+
+timerClass.resume = function(self: table)
+    self.on = true
+end
+
+timerClass.setTime = function(self: table, time: number)
+    self._time = time
+end
+
+m.new = function (time: number, listener: function, rep: number, name: string|undefined|null): table
+    rep = milo.defaultNumber(rep, 1)
+    local obj: table = {
+        time = time,
+        rep = rep,
+        listener = listener,
+        _time = time,
+        on = true,
+        name = name
+    }
+    for key, value in pairs(timerClass) do
+        obj[key] = value
+    end
+    table.insert(running, obj)
+    return obj
+end
+
+m.cancel = function(timer: table)
+    timer:cancel()
+end
+
+m.pause = function(timer: table)
+    timer.on = false
+end
+
+m.resume = function(timer: table)
+    timer.on = true
+end
+
+m.resumeAll = function(name: string|undefined|null)
+    for i = len(running)-1, 0, -1 do
+        if running[i] then
+            if name then
+                if name == running[i].name then
+                    running[i].on = true
+                end
+            else
+                running[i].on = true
+            end
+        end
+    end
+end
+
+m.pauseAll = function(name: string|undefined|null)
+    for i = len(running)-1, 0, -1 do
+        if running[i] then
+            if name then
+                if name == running[i].name then
+                    running[i].on = false
+                end
+            else
+                running[i].on = false
+            end
+        end
+    end
+end
+
+m.cancelAll = function(name: string|undefined|null)
+    for i = len(running)-1, 0, -1 do
+        if running[i] then
+            if name then
+                if name == running[i].name then
+                    running[i]:cancel()
+                end
+            else
+                running[i]:cancel()
+            end
+        end
+    end
+    if not name then
+        running = {}
+    end
+end
+
+m.update = function(dt: number)
+    for i = len(running)-1, 0, -1 do
+        local toRemove = false
+        if running[i].on then
+            running[i].time = running[i].time - (dt * 1000)
+            if running[i].time <= 0 then
+                running[i].listener(dt)
+                if running[i] then
+                    if running[i].rep == 1 then
+                        toRemove = true
+                    else
+                        running[i].rep = running[i].rep - 1
+                        running[i].time = running[i]._time
+                    end
+                end
+            end
+        end
+        if toRemove then
+            table.remove(running, i)
+        end
+    end
+end
+
+global timer = m
+milo.timer = timer

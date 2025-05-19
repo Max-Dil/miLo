@@ -1,0 +1,85 @@
+local base = require("/milo/xylo/base")
+
+local m: table = {}
+
+m.newRect = function(self: table, x: number|undefined|null, y: number|undefined|null, width: number|undefined|null, height: number|undefined|null): table
+    x = milo.defaultNumber(x)
+    y = milo.defaultNumber(y)
+    width = milo.defaultNumber(width, 100)
+    height = milo.defaultNumber(height, 100)
+    local obj: table = {
+        x = x,
+        y = y,
+        width = width,
+        height = height,
+        angle = 0,
+        isVisible = true,
+        xScale = 1, yScale = 1,
+        _type = "newRect",
+        group = self,
+        isUpdate = true,
+        color = {1,1,1,1},
+        events = {
+            update = {},
+            keypressed = {},
+            touch = {},
+            collision = {},
+            key = {}
+        },
+    }
+    for key, value in pairs(base) do
+        obj[key] = value
+    end
+    table.insert(self.obj, obj)
+
+    return obj
+end
+
+m.newGroup = function(self: table): table
+    local obj: table = {
+        x = 0,
+        y = 0,
+        xScale = 1,
+        yScale = 1,
+        obj = {},
+        isVisible = true,
+        isUpdate = true,
+        angle = 0,
+        group = self,
+        _type = "newGroup",
+        events = {
+            update = {},
+            key= {},
+        },
+    }
+    for key, value in pairs(m) do
+        obj[key] = value
+    end
+    -- for key, value in pairs(base) do
+    --     obj[key] = value
+    -- end
+    table.insert(self.obj, obj)
+    return obj
+end
+
+display.game = {
+    x = 0,
+    y = 0,
+    xScale = 1,
+    yScale = 1,
+    obj = {},
+    isVisible = true,
+    isUpdate = true,
+    angle = 0,
+    _type = "newGroup",
+    events = {
+        update = {},
+        key = {},
+    },
+}
+for key, value in pairs(m) do
+    display.game[key] = value
+end
+-- for key, value in pairs(base) do
+--     display.game[key] = value
+-- end

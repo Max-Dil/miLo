@@ -1,0 +1,78 @@
+local m = {}
+m.running = {}
+
+m.new = function(obj: table, listener: function)
+    if len(obj.events.key) <= 0 then
+        table.insert(m.running, obj)
+    end
+    table.insert(obj.events.key, listener)
+end
+
+m.remove = function(obj: table, listener: function)
+    for i = len(obj.events.key)-1, 0, -1 do
+        if obj.events.key[i] == listener then
+            table.remove(obj.events.key, i)
+            break
+        end
+    end
+    if len(obj.events.touch) == 0 then
+        for i = len(m.running)-1, 0, -1 do
+            if m.running[i] == obj then
+                table.remove(m.running, i)
+                break
+            end
+        end
+    end
+end
+
+m.keypressed = function(key: string, scancode: string, isrepeat: boolean)
+    for i = len(m.running)-1, 0, -1 do
+        local obj: table = m.running[i]
+        if obj.group.isVisible then
+            for i2 = 0, len(obj.events.key)-1, 1 do
+                local result = obj.events.key[i2](
+                    {
+                        phase = "began",
+                        key = key,
+                        scancode = scancode,
+                        isrepeat = isrepeat,
+                        target = obj
+                    }
+                )
+                if result == true then
+                    return 0
+                end
+            end
+        end
+    end
+end
+
+m.keyreleased = function(key: string)
+    for i = len(m.running)-1, 0, -1 do
+        local obj: table = m.running[i]
+        if obj.group.isVisible then
+            for i2 = 0, len(obj.events.key)-1, 1 do
+                local result = obj.events.key[i2](
+                    {
+                        phase = "ended",
+                        key = key,
+                        target = obj
+                    }
+                )
+                if result == true then
+                    return 0
+                end
+            end
+        end
+    end
+end
+
+document.addEventListener("keydown", function(event: table)
+    m.keypressed(event.key, event.code, event.repeat)
+end)
+
+document.addEventListener("keyup", function(event: table)
+    m.keyreleased(event.key)
+end)
+
+milo.__key = m

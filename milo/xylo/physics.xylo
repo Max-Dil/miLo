@@ -1,0 +1,232 @@
+local m = {}
+m.worlds = {}
+local worldClass = {}
+
+worldClass.addBody = function(self: table, obj: table, bodyType: string, options: table|undefined|null)
+
+    if obj.fixture then
+        self.world.destroyFixture(obj.fixture)
+    end
+
+    local bodyDef: table = {}
+
+    if bodyType == "static" then
+        bodyDef.type = "static"
+    else
+        if bodyType == "kinematic" then
+            bodyDef.type = "kinematic"
+        else
+            bodyDef.type = "dynamic"
+        end
+    end
+
+    bodyDef.position = {x = obj.x, y = obj.y}
+    bodyDef.angle = obj.angle or 0;
+
+    obj.body = self.world.createBody(bodyDef)
+
+    obj.oldBodyX = obj.x
+    obj.oldBodyY = obj.y
+    obj.oldBodyAngle = obj.angle or 0
+    
+    options = options or {}
+    options.offsetX = options.offsetX or 0
+    options.offsetY = options.offsetY or 0
+    local shape = nil
+    local fixtureDef = {}
+    fixtureDef.density = options.density or 1;
+    fixtureDef.friction = options.friction or 0.2;
+    fixtureDef.restitution = options.restitution or 0;
+    fixtureDef.isSensor = options.isSensor or false;
+
+    if options.shape == "rect" then
+        if not (options.width and options.height) then
+            error("addBody no width or height is options")
+        end
+        shape = milo.jsClass(milo.__physics.Box, options.width / 2, options.height / 2);
+    else
+        if options.shape == "circle" then
+            if not options.radius then
+                error("addBody no radius is options")
+            end
+            shape = milo.jsClass(milo.__physics.Circle, options.radius)
+        else
+            if options.shape == "chain" then
+                if not options.points then
+                    error("addBody no points is options",)
+                end
+
+                local vertices = {}
+                for i = 1, #options.points, 2 do
+                    table.insert(vertices, {x = options.points[i], y = options.points[i+1]})
+                end
+            
+                shape = milo.jsClass(milo.__physics.Chain, options.loop or false, vertices);
+            else
+                if options.shape == "edge" then
+                    if not (options.x1 and options.y1 and options.x2 and options.y2) then
+                        error("addBody no x1 or x2 or y1 or y2 is options")
+                    end
+                    shape = milo.jsClass(milo.__physics.Edge, {x = options.x1, y = options.y1}, {x = options.x2, y = options.y2});
+                else
+                    if options.shape == "polygon" then
+                        if not options.vertices then
+                            error("addBody no vertices is options")
+                        end
+
+                        local vertices = {}
+                        for i = 1, #options.vertices, 2 do
+                            table.insert(vertices, {x = options.vertices[i], y = options.vertices[i+1]})
+                        end
+                        shape = milo.jsClass(milo.__physics.Polygon, vertices)
+                    else
+                        -- Параметры дефолта для каждого обьекта
+                        if obj._type == "newRect" then
+                            shape = milo.jsClass(milo.__physics.Box, obj.width / 2, obj.height / 2)
+                            options.width = obj.width
+                            options.height = obj.height
+                            options.shape = "rect"
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    obj.bodyOptions = options or {offsetX = 0, offsetY = 0}
+
+    fixtureDef.shape = shape
+    obj.fixture = obj.body.createFixture(fixtureDef)
+    obj.fixture.setUserData(obj)
+
+    obj.world = self
+end
+
+
+worldClass.addCollision = function(self: table, obj: table, listener: function)
+    if len(obj.events.collision) <= 0 then
+        table.insert(self.events.collision, obj)
+    end
+    table.insert(obj.events.collision, listener)
+end
+
+worldClass.remove = function(self: table)
+    for i = 0, len(m.worlds)-1 do
+        if m.worlds[i] == self then
+            table.remove(m.worlds, i)
+            break
+        end
+    end
+    if self.world then
+        self.world.destroy()
+        self.events = {
+            collision = {},
+            preCollision = {},
+            postCollision = {}
+        }
+    end
+end
+
+m.newWorld = function(gx: number|undefined|null, gy: number|undefined|null): table
+    gx = milo.defaultNumber(gx, 0)
+    gy = milo.defaultNumber(gy, 9.8)
+    local world: table = {
+        isUpdate = false,
+        world = milo.jsClass(milo.__physics.World, {
+            gravity = {x = gx, y = gy},
+        }),
+        events = {
+            collision = {}
+        }
+    }
+    for key, value in pairs(worldClass) do
+        world[key] = value
+    end
+
+    world.world.on('begin-contact', function(contact)
+        local a = contact.getFixtureA()
+        local b = contact.getFixtureB()
+        local obj1: table = a.getUserData() or {}
+        local obj2: table = b.getUserData() or {}
+
+        for i = len(world.events.collision)-1, 0, -1 do
+            local obj: table = world.events.collision[i]
+            if obj then
+                local target
+                local other
+                local found = false
+
+                if obj == obj1 then
+                    target = obj1
+                    other = obj2
+                    found = true
+                else
+                    if obj == obj2 then
+                        target = obj2
+                        other = obj1
+                        found = true
+                    end
+                end
+
+                if found then
+                    local event: table = {
+                        phase = "began",
+                        target = target,
+                        other = other,
+                    }
+                    for i2 = len(obj.events.collision)-1, 0, -1 do
+                        local result = obj.events.collision[i2](event)
+                        if result then break end
+                    end
+                end
+            end
+        end
+        print("began", obj1, obj2)
+    end)
+
+    world.world.on('end-contact', function(contact)
+        local a = contact.getFixtureA()
+        local b = contact.getFixtureB()
+        local obj1: table = a.getUserData() or {}
+        local obj2: table = b.getUserData() or {}
+
+        for i = len(world.events.collision)-1, 0, -1 do
+            local obj: table = world.events.collision[i]
+            if obj then
+                local target
+                local other
+                local found = false
+
+                if obj == obj1 then
+                    target = obj1
+                    other = obj2
+                    found = true
+                else
+                    if obj == obj2 then
+                        target = obj2
+                        other = obj1
+                        found = true
+                    end
+                end
+
+                if found then
+                    local event: table = {
+                        phase = "ended",
+                        target = target,
+                        other = other,
+                    }
+                    for i2 = len(obj.events.collision)-1, 0, -1 do
+                        local result = obj.events.collision[i2](event)
+                        if result then break end
+                    end
+                end
+            end
+        end
+        print("ended", obj1, obj2)
+    end)
+
+    table.insert(m.worlds, world)
+    return world
+end
+
+global physics = m

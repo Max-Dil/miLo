@@ -1,0 +1,48 @@
+require("milo/main")
+
+local group = display.game
+local world = milo.physics.newWorld(0, 9.8 * 60)
+
+local r = group:newRect(150, 300, 100, 100)
+r:setColor(1,0,0)
+
+world:addBody(r, "static")
+
+local r2 = group:newRect(150, 150, 100, 100)
+
+world:addBody(r2, "dynamic")
+world.isUpdate = true
+
+r:addEvent("key", function(e)
+    -- print(e)
+    r2.body.setLinearVelocity({
+        x = 0,
+        y = - 500
+    })
+end)
+
+r2:addEvent("collision", function(e)
+    print(e)
+end)
+print(r2.body)
+
+timer.new(3000, function()
+    print(999999)
+end, 0)
+-- r:addEvent("touch", function(e)
+--     print(88888888)
+-- end)
+-- local g = group:newRect(150, 300, 50, 50)
+-- g:addEvent("touch", function(e)
+--     print(9999999)
+--     return true
+-- end)
+--world.isUpdate = true
+-- local group2 = group:newGroup()
+-- r2:moveToGroup(group2)
+-- group2.isVisible = false
+
+-- milo.update = function(dt)
+--     r2:translate(60 * dt)
+--     r:rotate(60 * dt)
+-- end
