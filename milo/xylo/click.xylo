@@ -32,11 +32,21 @@ local handle_touch = function(x: number, y: number, event_type: string)
     for i = len(m.running)-1, 0, -1 do
         local obj: table = m.running[i]
         local isTouch: boolean = false
-        if obj._type == "newRect" then
-            if (x > (obj.x - (obj.width / 2))) and (x < (obj.x + (obj.width / 2))) and
-       (y > (obj.y - (obj.height / 2))) and (y < (obj.y + (obj.height / 2))) then
-                isTouch = true
-            end
+        switch obj._type
+            case "newRect":
+                if (x > (obj.x - (obj.width / 2))) and (x < (obj.x + (obj.width / 2))) and
+                (y > (obj.y - (obj.height / 2))) and (y < (obj.y + (obj.height / 2))) then
+                    isTouch = true
+                end
+            case "newCircle":
+                local dx = x - obj.x
+                local dy = y - obj.y
+                local distance = math.sqrt(dx * dx + dy * dy)
+                if distance <= obj.radius then
+                    isTouch = true
+                end
+            
+            default: error("Object click no support")
         end
 
         if isTouch then

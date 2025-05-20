@@ -2,6 +2,40 @@ local base = require("/milo/xylo/base")
 
 local m: table = {}
 
+m.newCircle = function(self: table, x: number|undefined|null, y: number|undefined|null, radius: number|undefined|null): table
+    x = milo.defaultNumber(x)
+    y = milo.defaultNumber(y)
+    radius = milo.defaultNumber(radius, 50)
+    
+    local obj: table = {
+        x = x,
+        y = y,
+        radius = radius,
+        angle = 0,
+        isVisible = true,
+        xScale = 1, yScale = 1,
+        _type = "newCircle",
+        group = self,
+        isUpdate = true,
+        color = {1,1,1,1},
+        events = {
+            update = {},
+            keypressed = {},
+            touch = {},
+            collision = {},
+            key = {}
+        },
+    }
+    
+    for key, value in pairs(base) do
+        obj[key] = value
+    end
+    
+    table.insert(self.obj, obj)
+
+    return obj
+end
+
 m.newRect = function(self: table, x: number|undefined|null, y: number|undefined|null, width: number|undefined|null, height: number|undefined|null): table
     x = milo.defaultNumber(x)
     y = milo.defaultNumber(y)

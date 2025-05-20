@@ -1,1 +1,3 @@
 global display: table = {}
+
+display.renderMode = "normal"

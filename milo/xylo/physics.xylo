@@ -39,58 +39,64 @@ worldClass.addBody = function(self: table, obj: table, bodyType: string, options
     fixtureDef.restitution = options.restitution or 0;
     fixtureDef.isSensor = options.isSensor or false;
 
-    if options.shape == "rect" then
-        if not (options.width and options.height) then
-            error("addBody no width or height is options")
-        end
-        shape = milo.jsClass(milo.__physics.Box, options.width / 2, options.height / 2);
-    else
-        if options.shape == "circle" then
+    switch options.shape
+        case "rect":
+            if not (options.width and options.height) then
+                error("addBody no width or height is options")
+            end
+            shape = milo.jsClass(milo.__physics.Box, options.width / 2, options.height / 2)
+
+        case "circle":
             if not options.radius then
                 error("addBody no radius is options")
             end
             shape = milo.jsClass(milo.__physics.Circle, options.radius)
-        else
-            if options.shape == "chain" then
-                if not options.points then
-                    error("addBody no points is options",)
-                end
 
-                local vertices = {}
-                for i = 1, #options.points, 2 do
-                    table.insert(vertices, {x = options.points[i], y = options.points[i+1]})
-                end
-            
-                shape = milo.jsClass(milo.__physics.Chain, options.loop or false, vertices);
-            else
-                if options.shape == "edge" then
-                    if not (options.x1 and options.y1 and options.x2 and options.y2) then
-                        error("addBody no x1 or x2 or y1 or y2 is options")
-                    end
-                    shape = milo.jsClass(milo.__physics.Edge, {x = options.x1, y = options.y1}, {x = options.x2, y = options.y2});
-                else
-                    if options.shape == "polygon" then
-                        if not options.vertices then
-                            error("addBody no vertices is options")
-                        end
-
-                        local vertices = {}
-                        for i = 1, #options.vertices, 2 do
-                            table.insert(vertices, {x = options.vertices[i], y = options.vertices[i+1]})
-                        end
-                        shape = milo.jsClass(milo.__physics.Polygon, vertices)
-                    else
-                        -- Параметры дефолта для каждого обьекта
-                        if obj._type == "newRect" then
-                            shape = milo.jsClass(milo.__physics.Box, obj.width / 2, obj.height / 2)
-                            options.width = obj.width
-                            options.height = obj.height
-                            options.shape = "rect"
-                        end
-                    end
-                end
+        case "chain":
+            if not options.points then
+                error("addBody no points is options",)
             end
-        end
+
+            local vertices = {}
+            for i = 1, #options.points, 2 do
+                table.insert(vertices, {x = options.points[i], y = options.points[i+1]})
+            end
+        
+            shape = milo.jsClass(milo.__physics.Chain, options.loop or false, vertices)
+
+        case "edge":
+            if not (options.x1 and options.y1 and options.x2 and options.y2) then
+                error("addBody no x1 or x2 or y1 or y2 is options")
+            end
+            shape = milo.jsClass(milo.__physics.Edge, {x = options.x1, y = options.y1}, {x = options.x2, y = options.y2})
+
+        case "polygon":
+            if not options.vertices then
+                error("addBody no vertices is options")
+            end
+
+            local vertices = {}
+            for i = 1, #options.vertices, 2 do
+                table.insert(vertices, {x = options.vertices[i], y = options.vertices[i+1]})
+            end
+            shape = milo.jsClass(milo.__physics.Polygon, vertices)
+
+        default:
+            -- Параметры дефолта для каждого обьекта
+            switch obj._type
+                case "newRect":
+                    shape = milo.jsClass(milo.__physics.Box, obj.width / 2, obj.height / 2)
+                    options.width = obj.width
+                    options.height = obj.height
+                    options.shape = "rect"
+
+                case "newCircle":
+                    shape = milo.jsClass(milo.__physics.Circle, obj.radius)
+                    options.radius = obj.radius
+                    options.shape = "circle"
+
+                default: error("Avto body no support "..obj._type)
+            end
     end
 
     obj.bodyOptions = options or {offsetX = 0, offsetY = 0}

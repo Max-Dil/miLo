@@ -58,23 +58,19 @@ exports.moveToGroup = function(self: table, newGroup: table)
 end
 
 exports.addEvent = function(self: table, type: string, listener: function)
-    if type == "touch" then
-        milo.__click.new(self, listener)
-    else
-        if type == "key" then
+    switch type
+        case "touch":
+            milo.__click.new(self, listener)
+        case "key":
             milo.__key.new(self, listener)
-        else
-            if type == "update" then
-                milo.__update.new(self, listener)
-            else
-                if type == "collision" then
-                    if not self.world then
-                        error("Object "..self .. " is not body found")
-                    end
-                    self.world:addCollision(self, listener)
-                end
+        case "update":
+            milo.__update.new(self, listener)
+        case "collision":
+            if not self.world then
+                error("Object "..self .. " is not body found")
             end
-        end
+            self.world:addCollision(self, listener)
+        default: error("Event no support")
     end
 end
 
