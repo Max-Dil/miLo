@@ -95,6 +95,12 @@ worldClass.addBody = function(self: table, obj: table, bodyType: string, options
                     options.radius = obj.radius
                     options.shape = "circle"
 
+                case "newImage":
+                    shape = milo.jsClass(milo.__physics.Box, obj.width / 2, obj.height / 2)
+                    options.width = obj.width
+                    options.height = obj.height
+                    options.shape = "rect"
+
                 default: error("Avto body no support "..obj._type)
             end
     end

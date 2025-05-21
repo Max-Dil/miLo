@@ -6,6 +6,31 @@ window._draw = {"0": canvas, "1": ctx}
 
 const m = {};
 
+m.newImage = function(obj) {
+    ctx.save();
+
+    ctx.translate(obj.x, obj.y);
+    ctx.rotate(obj.angle * Math.PI / 180);
+
+    ctx.scale(
+        obj.flipX ? -obj.xScale : obj.xScale,
+        obj.flipY ? -obj.yScale : obj.yScale
+    );
+
+    ctx.globalAlpha = obj.color['3'];
+
+    const x = obj.flipX ? -obj.width/2 : -obj.width/2;
+    const y = obj.flipY ? -obj.height/2 : -obj.height/2;
+    
+    ctx.drawImage(
+        obj.image,
+        x, y,
+        obj.width, obj.height
+    );
+
+    ctx.restore();
+};
+
 m.newCircle = function(obj) {
     ctx.save();
 

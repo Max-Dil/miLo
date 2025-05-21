@@ -45,6 +45,12 @@ local handle_touch = function(x: number, y: number, event_type: string)
                 if distance <= obj.radius then
                     isTouch = true
                 end
+
+            case "newImage":
+                if (x > (obj.x - (obj.width / 2))) and (x < (obj.x + (obj.width / 2))) and
+                (y > (obj.y - (obj.height / 2))) and (y < (obj.y + (obj.height / 2))) then
+                    isTouch = true
+                end
             
             default: error("Object click no support")
         end

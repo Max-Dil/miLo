@@ -18,6 +18,9 @@ global milo: table = {
         return value or "null"
     end,
     jsClass = require("/milo/js/jsClass.js"),
+    loadImage = require("/milo/js/image.js"),
+
+    images = {},
 }
 
 milo.__physics = require("/milo/js/planck-xylo.js")

@@ -38,6 +38,8 @@ end, 0)
 local c = group:newCircle(300, 100, 50)
 
 display.renderMode = "hybrid"
+
+local d = group:newImage(300, 300, "housing1.png", 100, 100)
 -- r:addEvent("touch", function(e)
 --     print(88888888)
 -- end)

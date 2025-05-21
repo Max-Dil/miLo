@@ -2,6 +2,51 @@ local base = require("/milo/xylo/base")
 
 local m: table = {}
 
+m.newImage = function(self: table, x: number|undefined|null, y: number|undefined|null, path: string|undefined|null, width: number|undefined|null, height: number|undefined|null): table
+    x = milo.defaultNumber(x)
+    y = milo.defaultNumber(y)
+    width = milo.defaultNumber(width, 100)
+    height = milo.defaultNumber(height, 100)
+
+    if not milo.images[path] then
+        milo.images[path] = milo.loadImage(path)
+    end
+    
+    local obj: table = {
+        x = x,
+        y = y,
+        width = width,
+        height = height,
+        angle = 0,
+        isVisible = true,
+        xScale = 1, 
+        yScale = 1,
+        _type = "newImage",
+        group = self,
+        isUpdate = true,
+        color = {1,1,1,1},
+        path = path or "",
+        image = milo.images[path],
+        flipX = false,
+        flipY = false,
+        events = {
+            update = {},
+            keypressed = {},
+            touch = {},
+            collision = {},
+            key = {}
+        },
+    }
+    
+    for key, value in pairs(base) do
+        obj[key] = value
+    end
+    
+    table.insert(self.obj, obj)
+
+    return obj
+end
+
 m.newCircle = function(self: table, x: number|undefined|null, y: number|undefined|null, radius: number|undefined|null): table
     x = milo.defaultNumber(x)
     y = milo.defaultNumber(y)
