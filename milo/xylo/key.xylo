@@ -5,12 +5,13 @@ m.new = function(obj: table, listener: function)
     if len(obj.events.key) <= 0 then
         table.insert(m.running, obj)
     end
-    table.insert(obj.events.key, listener)
+    listener.uid = milo.generateUID()
+    table.insert(obj.events.key, {listener, listener.uid})
 end
 
 m.remove = function(obj: table, listener: function)
     for i = len(obj.events.key)-1, 0, -1 do
-        if obj.events.key[i] == listener then
+        if obj.events.key[i][1] == listener.uid then
             table.remove(obj.events.key, i)
             break
         end
@@ -30,7 +31,7 @@ m.keypressed = function(key: string, scancode: string, isrepeat: boolean)
         local obj: table = m.running[i]
         if obj.group.isVisible then
             for i2 = 0, len(obj.events.key)-1, 1 do
-                local result = obj.events.key[i2](
+                local result = obj.events.key[i2][0](
                     {
                         phase = "began",
                         key = key,
@@ -52,7 +53,7 @@ m.keyreleased = function(key: string)
         local obj: table = m.running[i]
         if obj.group.isVisible then
             for i2 = 0, len(obj.events.key)-1, 1 do
-                local result = obj.events.key[i2](
+                local result = obj.events.key[i2][0](
                     {
                         phase = "ended",
                         key = key,

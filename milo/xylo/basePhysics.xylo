@@ -1,0 +1,25 @@
+exports.removeBody = function(self: table)
+    if self.world then
+        if self.body then
+            self.world.world.destroyBody(self.body)
+
+            if self.events and self.events.collision and len(self.events.collision) > 0 then
+                for i = len(self.world.events.collision)-1, 0, -1 do
+                    if self.world.events.collision[i] == self then
+                        table.remove(self.world.events.collision, i)
+                        break
+                    end
+                end
+                self.events.collision = {}
+            end
+
+            self.world = nil
+            self.body = nil
+            self.fixture = nil
+
+            for key, value in pairs(exports) do
+                self[key] = nil
+            end
+        end
+    end
+end

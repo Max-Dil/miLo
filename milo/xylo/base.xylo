@@ -75,4 +75,72 @@ exports.addEvent = function(self: table, type: string, listener: function)
 end
 
 exports.removeEvent = function(self: table, type: string, listener: function)
+    switch type
+        case "touch":
+            milo.__click.remove(self, listener)
+
+        case "update":
+            milo.__update.remove(self, listener)
+
+        case "collision":
+            for i = len(self.events.collision)-1, 0, -1 do
+                if self.events.collision[i][1] == listener.uid then
+                    table.remove(self.events.collision, i)
+                    break
+                end
+            end
+            if len(self.events.collision) == 0 then
+                for i = len(self.world.events.collision)-1, 0, -1 do
+                    if self.world.events.collision[i] == self then
+                        table.remove(self.world.events.collision, i)
+                        break
+                    end
+                end
+            end
+        
+        case "key":
+            milo.__key.remove(self, listener)
+        default: error("Event no support")
+    end
+end
+
+exports.remove = function(self: table)
+    if self.removeBody then
+        self:removeBody()
+    end
+
+    if len(self.events.touch) >= 1 then
+        for i = len(milo.__click.running)-1, 0, -1 do
+            if milo.__click.running[i] == self then
+                table.remove(milo.__click.running, i)
+                break
+            end
+        end
+    end
+
+    if len(self.events.key) >= 1 then
+        for i = len(milo.__key.running)-1, 0, -1 do
+            if milo.__key.running[i] == self then
+                table.remove(milo.__key.running, i)
+                break
+            end
+        end
+    end
+
+    if len(self.events.update) >= 1 then
+        for i = len(milo.__update.running)-1, 0, -1 do
+            if milo.__update.running[i] == self then
+                table.remove(milo.__update.running, i)
+                break
+            end
+        end
+    end
+
+    local group = self.group
+    for i = len(group.obj)-1, 0, -1 do
+        if group.obj[i] == self then
+            table.remove(group.obj, i)
+            break
+        end
+    end
 end

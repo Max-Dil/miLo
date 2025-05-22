@@ -5,12 +5,13 @@ m.new = function(obj: table, listener: function)
     if len(obj.events.update) <= 0 then
         table.insert(m.running, obj)
     end
-    table.insert(obj.events.update, listener)
+    listener.uid = milo.generateUID()
+    table.insert(obj.events.update, {listener, listener.uid})
 end
 
 m.remove = function(obj: table, listener: function)
     for i = len(obj.events.update)-1, 0, -1 do
-        if obj.events.update[i] == listener then
+        if obj.events.update[i][1] == listener.uid then
             table.remove(obj.events.update, i)
             break
         end
@@ -34,7 +35,7 @@ m.update = function(dt: number)
         end
         if obj.group.isVisible then
             for i2 = 0, len(obj.events.update)-1, 1 do
-                obj.events.update[i2](
+                obj.events.update[i2][0](
                     {
                         dt = dt,
                         target = obj

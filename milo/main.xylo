@@ -21,6 +21,15 @@ global milo: table = {
     loadImage = require("/milo/js/image.js"),
 
     images = {},
+
+    generateUID = function(): string
+        local timestamp: number = os.time()
+        local randPart: number = math.random(1, 999999)
+
+        local uid: string = string.format("%x-%x-%x", timestamp, randPart, math.random(1, 99999))
+        
+        return uid
+    end
 }
 
 milo.__physics = require("/milo/js/planck-xylo.js")
@@ -40,5 +49,3 @@ loop.init(milo)
 require("/milo/xylo/click.xylo")
 require("/milo/xylo/key.xylo")
 require("/milo/xylo/update.xylo")
-
-print(milo)

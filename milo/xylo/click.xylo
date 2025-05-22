@@ -8,12 +8,13 @@ m.new = function(obj: table, listener: function)
     if len(obj.events.touch) == 0 then
         table.insert(m.running, obj)
     end
-    table.insert(obj.events.touch, listener)
+    listener.uid = milo.generateUID()
+    table.insert(obj.events.touch, {listener, listener.uid})
 end
 
 m.remove = function(obj: table, listener: function)
     for i = len(obj.events.touch)-1, 0, -1 do
-        if obj.events.touch[i] == listener then
+        if obj.events.touch[i][1] == listener.uid then
             table.remove(obj.events.touch, i)
             break
         end
@@ -64,7 +65,7 @@ local handle_touch = function(x: number, y: number, event_type: string)
                     x = x,
                     y = y,
                 }
-                result = obj.events.touch[j](event)
+                result = obj.events.touch[j][0](event)
                 if result then
                     break
                 end

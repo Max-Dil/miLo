@@ -2,6 +2,8 @@ local m = {}
 m.worlds = {}
 local worldClass = {}
 
+local physicsFunc = require("/milo/xylo/basePhysics.xylo")
+
 worldClass.addBody = function(self: table, obj: table, bodyType: string, options: table|undefined|null)
 
     if obj.fixture then
@@ -112,6 +114,10 @@ worldClass.addBody = function(self: table, obj: table, bodyType: string, options
     obj.fixture.setUserData(obj)
 
     obj.world = self
+
+    for key, value in pairs(physicsFunc) do
+        obj[key] = value
+    end
 end
 
 
@@ -119,7 +125,8 @@ worldClass.addCollision = function(self: table, obj: table, listener: function)
     if len(obj.events.collision) <= 0 then
         table.insert(self.events.collision, obj)
     end
-    table.insert(obj.events.collision, listener)
+    listener.uid = milo.generateUID()
+    table.insert(obj.events.collision, {listener, listener.uid})
 end
 
 worldClass.remove = function(self: table)
@@ -187,13 +194,12 @@ m.newWorld = function(gx: number|undefined|null, gy: number|undefined|null): tab
                         other = other,
                     }
                     for i2 = len(obj.events.collision)-1, 0, -1 do
-                        local result = obj.events.collision[i2](event)
+                        local result = obj.events.collision[i2][0](event)
                         if result then break end
                     end
                 end
             end
         end
-        print("began", obj1, obj2)
     end)
 
     world.world.on('end-contact', function(contact)
@@ -228,13 +234,12 @@ m.newWorld = function(gx: number|undefined|null, gy: number|undefined|null): tab
                         other = other,
                     }
                     for i2 = len(obj.events.collision)-1, 0, -1 do
-                        local result = obj.events.collision[i2](event)
+                        local result = obj.events.collision[i2][0](event)
                         if result then break end
                     end
                 end
             end
         end
-        print("ended", obj1, obj2)
     end)
 
     table.insert(m.worlds, world)

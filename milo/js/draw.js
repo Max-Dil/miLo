@@ -6,6 +6,31 @@ window._draw = {"0": canvas, "1": ctx}
 
 const m = {};
 
+m.newPolygon = function(obj) {
+    ctx.save();
+
+    ctx.translate(obj.x, obj.y);
+    ctx.rotate(obj.angle * Math.PI / 180);
+    ctx.scale(obj.xScale, obj.yScale);
+
+    ctx.fillStyle = `rgba(${
+        obj.color['0'] * 255}, ${
+        obj.color['1'] * 255}, ${
+        obj.color['2'] * 255}, ${obj.color['3']})`;
+
+    ctx.beginPath();
+    if (obj.vertices.length > 0) {
+        ctx.moveTo(obj.vertices[0], obj.vertices[1]);
+        for (let i = 2; i < obj.vertices.length; i += 2) {
+            ctx.lineTo(obj.vertices[i], obj.vertices[i+1]);
+        }
+        ctx.closePath();
+    }
+    ctx.fill();
+
+    ctx.restore();
+};
+
 m.newImage = function(obj) {
     ctx.save();
 

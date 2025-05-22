@@ -4,32 +4,34 @@ local group = display.game
 local world = milo.physics.newWorld(0, 9.8 * 60)
 
 local r = group:newRect(150, 300, 100, 100)
---r:setColor(1,0,0)
-
 world:addBody(r, "static")
 
 local r2 = group:newRect(150, 150, 100, 100)
-
 world:addBody(r2, "dynamic")
 world.isUpdate = true
 
 r:addEvent("key", function(e)
-    -- print(e)
-end)
-
-r2:addEvent("collision", function(e)
     print(e)
 end)
+
+local cool = function(e)
+    print(e)
+    print(111111111111111111)
+end
+r2:addEvent("collision", cool)
 print(r2.body)
 
-r2:addEvent("touch", function(e)
+local click = function(e)
     if e.phase == "began" then
         r2.body.setLinearVelocity({
             x = 0,
             y = - 500
         })
+        r2:removeEvent("collision", cool)
+        r2:removeEvent("touch", click)
     end
-end)
+end
+r2:addEvent("touch", click)
 
 timer.new(3000, function()
     print(999999)
