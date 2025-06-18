@@ -23,10 +23,7 @@ print(r2.body)
 
 local click = function(e)
     if e.phase == "began" then
-        r2.body.setLinearVelocity({
-            x = 0,
-            y = - 500
-        })
+        r2:setLinearVelocity(0, -500)
         r2:removeEvent("collision", cool)
         r2:removeEvent("touch", click)
     end

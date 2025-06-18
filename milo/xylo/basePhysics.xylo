@@ -23,3 +23,109 @@ exports.removeBody = function(self: table)
         end
     end
 end
+
+exports.setLinearVelocity = function(self: table, x: number, y: number)
+    self.body.setLinearVelocity({x = x, y = y})
+end
+exports.getLinearVelocity = function(self: table): number
+    return self.body.getLinearVelocity()
+end
+
+exports.setAngularVelocity = function(self: table, omega: number)
+    self.body.setAngularVelocity(omega)
+end
+exports.getAngularVelocity = function(self: table): number
+    return self.body.getAngularVelocity()
+end
+
+exports.applyLinearImpulse = function(self: table, impulseX: number, impulseY: number, pointX: number, pointY: number)
+    self.body.applyLinearImpulse({x = impulseX, y = impulseY}, {x = pointX, y = pointY})
+end
+
+exports.applyForce = function(self: table, forceX: number, forceY: number, pointX: number, pointY: number)
+    self.body.applyForce({x = forceX, y = forceY}, {x = pointX, y = pointY})
+end
+
+exports.applyTorque = function(self: table, torque: number)
+    self.body.applyTorque(torque)
+end
+
+exports.getMass = function(self: table): number
+    return self.body.getMass()
+end
+
+exports.setMassData = function(self: table, mass: number, centerX: number, centerY: number, I: number)
+    self.body.setMassData({mass = mass, center = {x = centerX, y = centerY}, I = I})
+end
+
+exports.resetMassData = function(self: table)
+    self.body.resetMassData()
+end
+
+exports.setAwake = function(self: table, flag: boolean)
+    self.body.setAwake(flag)
+end
+
+exports.isAwake = function(self: table): boolean
+    return self.body.isAwake()
+end
+
+exports.setActive = function(self: table, flag: boolean)
+    self.body.setActive(flag)
+end
+
+exports.isActive = function(self: table): boolean
+    return self.body.isActive()
+end
+
+exports.setFixedRotation = function(self: table, flag: boolean)
+    self.body.setFixedRotation(flag)
+end
+
+exports.isFixedRotation = function(self: table): boolean
+    return self.body.isFixedRotation()
+end
+
+exports.setType = function(self: table, type: string) -- "dynamic", "static", "kinematic"
+    self.body.setType(type)
+end
+
+exports.getType = function(self: table): string
+    return self.body.getType()
+end
+
+exports.getWorldPoint = function(self: table, localX: number, localY: number): table
+    return self.body.getWorldPoint({x = localX, y = localY})
+end
+
+exports.getWorldVector = function(self: table, localX: number, localY: number): table
+    return self.body.getWorldVector({x = localX, y = localY})
+end
+
+exports.getLocalPoint = function(self: table, worldX: number, worldY: number): table
+    return self.body.getLocalPoint({x = worldX, y = worldY})
+end
+
+exports.getLocalVector = function(self: table, worldX: number, worldY: number): table
+    return self.body.getLocalVector({x = worldX, y = worldY})
+end
+
+exports.createFixture = function(self: table, shape: table, fixtureDef: table)
+    return self.body.createFixture(shape, fixtureDef)
+end
+
+exports.destroyFixture = function(self: table, fixture: table)
+    self.body.destroyFixture(fixture)
+end
+
+exports.getFixtureList = function(self: table): table
+    return self.body.getFixtureList()
+end
+
+exports.getWorld = function(self: table): table
+    return self.body.getWorld()
+end
+
+exports.getNext = function(self: table): table
+    return self.body.getNext()
+end
